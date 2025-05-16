@@ -1,0 +1,8 @@
+project:
+  name: contoso-etl-airflow--data-pipeline
+
+deployments:
+  airflow:
+    volumes:
+      - ./output:/opt/airflow/output
+      - ./shared:/opt/airflow/shared/contoso-etl-airflow
