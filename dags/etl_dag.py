@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -7,6 +8,7 @@ import sys
 import os
 import pandas as pd
 import pickle
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from etl.extract.extract import extract_selected_tables
 from etl.transform.main import CustomerAnalytics
@@ -14,10 +16,15 @@ from etl.load.loader import (save_csv, save_excel, save_multiple_csv, save_multi
 
 logger = logging.getLogger(__name__)
 
-shared_dir = Path("/opt/airflow/shared/contoso-etl-airflow")
-shared_dir.mkdir(parents= True, exist_ok= True)
+def get_shared_dir():
+    shared_dir = Path("/opt/airflow/shared/contoso-etl-airflow")
+    shared_dir.mkdir(parents=True, exist_ok=True)
+    return shared_dir
+
 
 def extract_data():
+    shared_dir = get_shared_dir()
+
     dfs = extract_selected_tables()
     with open(shared_dir / "dfs.pkl", "wb") as f:
         pickle.dump(dfs, f)
@@ -25,6 +32,8 @@ def extract_data():
     logger.info("✅ Veriler alındı")
 
 def transform_data():
+    shared_dir = get_shared_dir()
+
     with open(shared_dir / "dfs.pkl", "rb") as f:
         dfs = pickle.load(f)
 
@@ -36,7 +45,7 @@ def transform_data():
     result = {
     "rfm": analytics.rfm(),
     "churn": analytics.churn(),
-    "geo_sales": analytics.geography_sales()
+    "cohort": analytics.cohort()
     }
     result2 = analytics.never_purchased_customers()
     with open(shared_dir / "result.pkl", "wb") as f:
@@ -47,6 +56,8 @@ def transform_data():
     logger.info("✅ Veriler dönüştürüldü")
 
 def load_data():
+    shared_dir = get_shared_dir()
+
     with open(shared_dir / "result.pkl", "rb") as f:
         load_data1= pickle.load(f)
     with open(shared_dir / "result2.pkl", "rb") as f:
@@ -81,7 +92,7 @@ with DAG(
     dag_id="etl_pipeline",
     default_args=default_args,
     start_date=datetime(2024, 1, 1),
-    schedule_interval="@daily",
+    schedule='@daily',
     catchup=False
 ) as dag:
 

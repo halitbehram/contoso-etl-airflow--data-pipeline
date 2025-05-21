@@ -33,7 +33,7 @@ def extract_selected_tables() -> dict:
     for table in tables:
         try:
             logger.info(f"{table} tablosu işleniyor")
-            df = pd.read_sql(f"SELECT * FROM {table}", engine)
+            df = pd.read_sql(f"SELECT TOP 100000 * FROM {table}", engine)
             dataframes[table] = df
             logger.info(f"{table} tablosu yüklendi: {df.shape}")
         except Exception as e:

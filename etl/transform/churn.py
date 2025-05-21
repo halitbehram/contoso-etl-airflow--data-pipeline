@@ -4,6 +4,7 @@ import pandas as pd
 
 def churn_analysis(fact_online_sales: pd.DataFrame, dim_date: pd.DataFrame, reference_date: Optional[pd.Timestamp] = None) -> pd.DataFrame:
 
+    dim_date.rename(columns={"Datekey": "DateKey"}, inplace=True)
     df = fact_online_sales.merge(dim_date, on = "DateKey")
     df["OrderDate"] = pd.to_datetime(df["FullDateLabel"])
     last_purchase = df.groupby("CustomerKey").agg(

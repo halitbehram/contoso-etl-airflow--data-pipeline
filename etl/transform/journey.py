@@ -3,6 +3,7 @@ import pandas as pd
 
 def customer_journey_lag(fact_online_sales: pd.DataFrame, dim_date: pd.DataFrame, dim_customer:pd.DataFrame) -> pd.DataFrame:
 
+    dim_date.rename(columns={"Datekey": "DateKey"}, inplace=True)
     df = fact_online_sales.merge(dim_date, on = "DateKey")
     df["FullDateLabel"] = pd.to_datetime(df["FullDateLabel"])
     first_shopping = df.groupby("CustomerKey").agg(

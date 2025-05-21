@@ -2,6 +2,7 @@ import pandas as pd
 
 def cohort_analysis(fact_online_sales: pd.DataFrame, dim_date: pd.DataFrame) -> pd.DataFrame:
 
+    dim_date.rename(columns={"Datekey": "DateKey"}, inplace=True)
     df = fact_online_sales.merge(dim_date, on = "DateKey")
 
     df["YearMonth"] = pd.to_datetime(df["FullDateLabel"]).dt.to_period("M")
